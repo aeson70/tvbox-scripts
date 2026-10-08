@@ -1,227 +1,1240 @@
-/**
- * OmniBox / 蜘蛛聚合系统 - 多源短剧标准脚本 (CommonJS)
- * 聚合了：低端影视(短剧版) + 短剧好看
- */
-
-const axios = require('axios');
-
-const HOST_DIDUAN = "https://diduan3.com";
-const HOST_HAOKAN = "http://duanjuhk.com";
-const UA = "Mozilla/5.0 (Linux; Android 10; Mobile)";
-
-// 辅助工具：字符串截取
-function ctxString(str, startStr, endStr) {
-    let startIndex = str.indexOf(startStr);
-    if (startIndex === -1) return "";
-    startIndex += startStr.length;
-    let endIndex = str.indexOf(endStr, startIndex);
-    if (endIndex === -1) return "";
-    return str.substring(startIndex, endIndex);
-}
-
-/**
- * 1. 首页初始化 (组合两个站的分类，使用前缀区分)
- */
-async function home(filter) {
-    try {
-        const classes = [
-            // 低端影视短剧分类
-            { "type_id": "dd_guzhuang", "type_name": "低端·古装" },
-            { "type_id": "dd_nielian", "type_name": "低端·虐恋" },
-            { "type_id": "dd_nixi", "type_name": "低端·逆袭" },
-            { "type_id": "dd_zongcai", "type_name": "低端·总裁" },
-            // 短剧好看分类
-            { "type_id": "hk_jingxuan", "type_name": "好看·精选" },
-            { "type_id": "hk_dushi", "type_name": "好看·都市" },
-            { "type_id": "hk_chuanyue", "type_name": "好看·穿越" }
-        ];
-        return JSON.stringify({ class: classes, filters: {} });
-    } catch (e) {
-        return JSON.stringify({ class: [] });
-    }
-}
-
-/**
- * 2. 分类页面数据获取
- */
-async function category(tid, pg, filter, extend) {
-    try {
-        const page = pg || 1;
-        const list = [];
-
-        // 分流处理：如果是低端影视的分类
-        if (tid.startsWith("dd_")) {
-            const cateMap = { "dd_guzhuang": "古装", "dd_nielian": "虐恋", "dd_nixi": "逆袭", "dd_zongcai": "总裁" };
-            const tag = encodeURIComponent(cateMap[tid] || "古装");
-            // 拼接低端影视筛选URL
-            const url = `${HOST_DIDUAN}/show-duanju---${tag}-------${page}---/`;
-            const res = await axios.get(url, { headers: { "User-Agent": UA } });
-            const html = res.data;
-            
-            const blockReg = /<div class="module-item">([\s\(\S\)]*?)<\/div>\s*<\/div>/g;
-            let match;
-            while ((match = blockReg.exec(html)) !== null) {
-                const content = match[1];
-                const id = ctxString(content, 'href="/video/', '.html"');
-                const name = ctxString(content, 'title="', '"');
-                const pic = ctxString(content, 'data-original="', '"');
-                const remarks = ctxString(content, 'module-item-note">', '</div>');
-                
-                if(id) {
-                    list.push({
-                        vod_id: "dd_" + id,
-                        vod_name: "[低端] " + name,
-                        vod_pic: pic,
-                        vod_remarks: remarks.replace(/<[^>]+>/g, '').trim()
-                    });
+{
+    "spider": "./jar/xyqxbpq.jar",
+    "sites": [
+        {
+            "key": "✨五点短剧✨",
+            "name": "✨五点短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/五点短剧.json"
+        },
+        {
+            "key": "✨乾坤短剧✨",
+            "name": "✨乾坤短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/乾坤短剧.json"
+        },
+        {
+            "key": "py_星芽短剧APP",
+            "name": "✨py星芽短剧✨乐哥甄选✨",
+            "api": "./py/星芽短剧.py",
+            "filterable": 1,
+            "quickSearch": 1,
+            "searchable": 1,
+            "type": 3
+        },
+        {
+            "key": "py_河马短剧APP",
+            "name": "✨py河马短剧✨乐哥甄选✨",
+            "api": "./py/河马短剧.py",
+            "filterable": 1,
+            "quickSearch": 1,
+            "searchable": 1,
+            "type": 3
+        },
+        {
+            "key": "py_西饭短剧APP",
+            "name": "✨py稀饭短剧✨乐哥甄选✨",
+            "api": "./py/西饭短剧.py",
+            "filterable": 1,
+            "quickSearch": 1,
+            "searchable": 1,
+            "type": 3
+        },
+        {
+            "key": "✨稀饭短剧✨",
+            "name": "✨xp稀饭短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/稀饭短剧.json"
+        },
+        {
+            "key": "✨网飞短剧✨",
+            "name": "✨网飞短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/网飞短剧.json"
+        },
+        {
+            "key": "短剧好看",
+            "name": "✨短剧好看✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "ext": {
+                "分类url": "http://duanjuhk.com/vodshow/id/{cateId}/letter/{letter}/page/{catePg}.html",
+                "分类": "精选短剧$jingxuanduanju#都市$dushi#穿越$chuanyue#古代$gudai#福利短剧$fuliduanju",
+                "简介": "✨乐哥为您介绍剧情👉请不要相信视频中的广告，以免上当受骗！+简介：&&</li>",
+                "线路二次截取": "tabs-swiper&&</div>",
+                "线路数组": "<a&&/a>",
+                "线路标题": "</i>&&<",
+                "跳转播放链接": "var player_*\"url\":\"&&\"",
+                "搜索url": "http://duanjuhk.com/vodsearch/page/{pg}/wd/{wd}.html",
+                "搜索模式": "1"
+            }
+        },
+        {
+            "key": "低端影视",
+            "name": "✨低端短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": {
+                "主页url": "https://diduan3.com/show-duanju-----------/",
+                "数组": "/video/&&</a>",
+                "副标题": "module-item-note\">&&</div",
+                "链接": "/video/+&&\"",
+                "影片年代": "-----------*/\" title=\"&&\"",
+                "影片地区": "-*----------/\" title=\"&&\"",
+                "影片类型": "---*--------/\" title=\"&&\"",
+                "状态": "集数：&&</div",
+                "简介": "✨乐哥为您介绍剧情👉请不要相信视频中的广告，以免上当受骗！+module-info-introduction-content\">&&</div",
+                "线路数组": "data-dropdown&&</div[替换:value=\">>value=\"%E2%9C%A8%E4%B9%90%E5%93%A5%E6%8E%A8%E8%8D%90%E2%9C%A8]",
+                "线路标题": "urlDecode(value=\"&&\")+【共+<small>&&</+集】",
+                "播放数组": "play-list\"&&</div>",
+                "倒序": "0",
+                "播放列表": "<a&&/a>",
+                "播放标题": "<span>&&<",
+                "播放链接": "href=\"&&\"",
+                "跳转播放链接": "urlDecode(var player_*\"url\":\"&&%26)",
+                "分类url": "https://diduan3.com/show-duanju-{area}-{by}-{cateId}-{lang}-{letter}---{catePg}---{year}/",
+                "分类": "古装&虐恋&逆袭&悬疑&神豪&重生&反转&复仇&穿越&总裁&甜宠&强者&言情&爽文&女恋&闪婚&离婚&都市&脑洞&仙侠&民国&合集",
+                "分类值": "*",
+                "筛选": "1",
+                "免嗅": "1",
+                "年份": "1950-2025",
+                "年份值": "*",
+                "排序": "更新时间&最多播放&实时热门&近期热播&新片上线&最高评分",
+                "排序值": "time&hits&hits_day&hits_week&year&score"
+            }
+        },
+        {
+            "key": "✨白羊短剧✨",
+            "name": "✨白羊短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/白羊短剧.json"
+        },
+        {
+            "key": "熊猫短剧",
+            "name": "✨熊猫短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": {
+                "请求头": "User-Agent$MOBILE_UA",
+                "编码": "UTF-8",
+                "主页url": "https://www.xtqyzz.com/screen/duanju-----------.html",
+                "二次截取": "module-items\"&&id=\"page\"[替换:module-footer>>module-item]",
+                "数组": "lazyloaded&&module-item\"",
+                "标题": "alt=\"&&\"",
+                "链接": "href=\"&&\"",
+                "副标题": "module-item-text\">&&<",
+                "简介": "✨乐哥为您介绍剧情👉请不要相信视频中的广告，以免上当受骗！+none;\">&&<span",
+                "影片类型": "slash\">&&<a href=\"/player/",
+                "线路数组": "data-dropdown&&</div[替换:<span>><span>%E2%9C%A8%E4%B9%90%E5%93%A5%E6%8E%A8%E8%8D%90%E2%9C%A8]",
+                "线路标题": "urlDecode(<span>&&</)+【共+<small>&&</+集】",
+                "搜索url": "https://www.xtqyzz.com/search/{wd}----------{pg}---.html",
+                "分类url": "https://www.xtqyzz.com/screen/duanju-{area}-{by}-{cateId}-{lang}-{letter}---{catePg}---{year}.html",
+                "分类": "都市&赘婿&战神&古代言情&现代言情&历史&脑洞&玄幻&搞笑&网剧&喜剧&萌宝&神豪&超能&甜宠&复仇&神医&亲情&重生&穿越&年代&悬疑&虐恋&古装&逆袭",
+                "分类值": "*",
+                "免嗅": "1",
+                "跳转播放链接": "urlDecode(Base64(var player_*url\":\"&&\"))",
+                "筛选": "1",
+                "剧情": "",
+                "年份": "1950-2025",
+                "年份值": "*"
+            }
+        },
+        {
+            "key": "✨八戒短剧✨",
+            "name": "✨八戒短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/八戒短剧.json"
+        },
+        {
+            "key": "✨趣映坊短剧✨",
+            "name": "✨趣映坊短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/趣映坊短剧.json"
+        },
+        {
+            "key": "✨明星短剧✨",
+            "name": "✨明星短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/明星短剧.json"
+        },
+        {
+            "key": "✨开尔短剧✨",
+            "name": "✨开尔短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/开尔短剧.json"
+        },
+        {
+            "key": "✨全能短剧✨",
+            "name": "✨全能短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/全能短剧.json"
+        },
+        {
+            "key": "✨影院王✨",
+            "name": "✨短剧王✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/短剧王.json"
+        },
+        {
+            "key": "✨热播影院✨",
+            "name": "✨热播短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/热播短剧.json"
+        },
+        {
+            "key": "OK短剧",
+            "name": "✨OK短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "ext": {
+                "请求头": "User-Agent$MOBILE_UA",
+                "编码": "UTF-8",
+                "主页url": "http://okfrp.com/show/40-----------.html",
+                "数组": "lazyload\"&&</a>",
+                "标题": "title=\"&&\"",
+                "图片": "data-original=\"&&\"",
+                "副标题": "text-right\">&&</span>",
+                "链接": "href=\"&&\"",
+                "简介": "content\">&&</p>",
+                "跳转播放链接": "var player_*\"url\":\"&&\"",
+                "分类url": "http://okfrp.com/show/{cateId}-----{letter}---{catePg}---{year}.html",
+                "分类": "女频恋爱$nvpinlianai#反转爽剧$fanzhuanshuangju#脑洞悬疑$naodongxuanyi#年代穿越$niandaichuanyue#古装仙侠$guzhuangxianxia#现代都市$xiandaidushi"
+            }
+        },
+        {
+            "key": "✨影视大全1✨",
+            "name": "✨短剧大全1✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": {
+                "请求头": "User-Agent$MOBILE_UA",
+                "编码": "UTF-8",
+                "主页url": "https://www.yingshidaquantv.com/index.php/ajax/data?mid=1&tid=36",
+                "二次截取": "list\":\\[&&\\][替换:\"vod_id>>组头\"vod_id#\"vod_year>>组尾\"vod_year]",
+                "数组": "组头&&组尾",
+                "标题": "vod_name\":\"&&\"",
+                "图片": "vod_pic\":\"&&\"",
+                "副标题": "vod_remarks\":\"&&\"",
+                "链接": "/vod/+vod_id\":&&,+.html",
+                "线路数组": "\\#ewave-playlist&&</ul>",
+                "线路标题": "✨乐哥推荐✨+>&&</",
+                "跳转播放链接": "var player_*\"url\":\"&&\"",
+                "简介": "✨乐哥为您介绍剧情👉请不要相信视频中的广告，以免上当受骗！+简介：&&</div>",
+                "分类url": "/index.php/ajax/data?mid=1&tid={cateId}&page={catePg}&limit=30",
+                "分类": "重生民国$37&穿越年代$38&现代言情$39&反转爽文$40&女恋总裁$41&闪婚离婚$42&都市脑洞$43&古装仙侠$44"
+            }
+        },
+        {
+            "key": "✨HG短剧✨",
+            "name": "✨HG短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": {
+                "请求头": "User-Agent$MOBILE_UA",
+                "编码": "UTF-8",
+                "图片代理": "",
+                "主页url": "https://hong.hgyx.vip/index.php/vod/show/id/20.html",
+                "首页": "200",
+                "起始页": "1",
+                "分类url": "https://hong.hgyx.vip/index.php/vod/show/class/{cateId}/id/20/page/{catePg}.html",
+                "分类": "古装&虐恋&逆袭&悬疑&神豪&重生&反转&穿越&总裁&甜宠&言情&爽文&女恋&都市&脑洞&仙侠",
+                "分类值": "*",
+                "简介": "👉请不要相信视频中的广告，以免上当受骗！+<p>&&</p>"
+            }
+        },
+        {
+            "key": "✨奶茶影院✨",
+            "name": "✨奶茶短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/奶茶短剧.json"
+        },
+        {
+            "key": "✨电影100影院✨",
+            "name": "✨电影100短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/电影100短剧.json"
+        },
+        {
+            "key": "✨麦田影院✨",
+            "name": "✨麦田短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/麦田短剧.json"
+        },
+        {
+            "key": "✨唐人街影院✨",
+            "name": "✨唐人街短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/唐人街短剧.json"
+        },
+        {
+            "key": "✨天龙影院✨",
+            "name": "✨天龙短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/天龙短剧.json"
+        },
+        {
+            "key": "✨追剧网✨",
+            "name": "✨追剧短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/追剧短剧.json"
+        },
+        {
+            "key": "追剧影院1",
+            "name": "✨追剧短剧1✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "ext": "./json/追剧短剧1.json"
+        },
+        {
+            "key": "追剧网1",
+            "name": "✨追剧短剧2✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "ext": "./json/追剧短剧2.json"
+        },
+        {
+            "key": "✨一起看✨",
+            "name": "✨一起看短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/一起看短剧.json"
+        },
+        {
+            "key": "✨七味短剧✨",
+            "name": "✨七味短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/七味短剧.json"
+        },
+        {
+            "key": "优影视",
+            "name": "✨优短剧✨乐哥甄选✨",
+            "type": 3,
+            "jar": "./jar/sjc.jar",
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/优短剧.json"
+        },
+        {
+            "key": "✨量子影视✨",
+            "name": "✨量子短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/量子短剧.json"
+        },
+        {
+            "key": "护航短剧",
+            "name": "✨护航短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "ext": {
+                "请求头": "User-Agent$MOBILE_UA",
+                "编码": "UTF-8",
+                "主页url": "https://www.qdhuhang.com/qdhyl/48.html",
+                "数组": "part-2by3\"&&/a><span",
+                "标题": "html\">&&<",
+                "副标题": "✨+center\">&&<",
+                "图片": "data-original=\"&&\"",
+                "链接": "href=\"&&\"",
+                "线路数组": "ico_play.png&&/span>",
+                "线路标题": "✨乐哥推荐✨+>&&<",
+                "播放数组": "clearfix list&&</ul>",
+                "播放列表": "<a&&a>",
+                "播放链接": "href=\"&&\"",
+                "播放标题": "✨+>&&</",
+                "跳转播放链接": "var now=\"&&\"",
+                "简介": "✨指间的黑客为您介绍剧情✨+讲述了:&&\">[替换:style type=\"text/css>>空]",
+                "分类url": "https://www.qdhuhang.com/qdhyl/{cateId}-{catePg}.html",
+                "分类": "女频剧$49#反转剧$50#穿越剧$51#古装剧$52#都市剧$53#脑洞剧$54#爽文剧$55"
+            }
+        },
+        {
+            "key": "✨安迪短剧✨",
+            "name": "✨安迪短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/安迪短剧.json"
+        },
+        {
+            "key": "✨PTT短剧✨",
+            "name": "✨PTT短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/PTT短剧.json"
+        },
+        {
+            "key": "✨老王影院✨",
+            "name": "✨老王短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/老王短剧.json"
+        },
+        {
+            "key": "✨毒舌短剧✨",
+            "name": "✨毒舌短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/毒舌短剧.json"
+        },
+        {
+            "key": "✨微云影视✨",
+            "name": "✨微云短剧✨乐哥甄选✨",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/微云短剧.json"
+        },
+        {
+            "key": "闪闪音乐网",
+            "name": "🎵闪闪音乐网",
+            "type": 3,
+            "api": "csp_XBPQ",
+            "searchable": 1,
+            "quickSearch": 1,
+            "filterable": 1,
+            "ext": "./json/闪闪音乐网.json"
+        },
+        {
+            "key": "應用商店",
+            "name": "关注公众号【乐哥影视】",
+            "type": 3,
+            "jar": "./lib/pg.jar",
+            "api": "csp_Market",
+            "searchable": 0,
+            "changeable": 0,
+            "ext": "./lib/market.json"
+        }
+    ],
+    "lives": [
+        {
+            "name": "live",
+            "type": 0,
+            "url": "https://agit.ai/Yoursmile7/TVBox/raw/branch/master/live.txt",
+            "epg": "http://epg.112114.xyz/?ch={name}&date={date}",
+            "logo": "https://epg.112114.xyz/logo/{name}.png"
+        }
+    ],
+    "rules": [
+        {
+            "host": "dyxs20.com",
+            "rule": [
+                ".m3u8"
+            ]
+        },
+        {
+            "host": "*",
+            "rule": [
+                "default.365yg.com"
+            ]
+        },
+        {
+            "host": "www.djuu.com",
+            "rule": [
+                "mp4.djuu.com",
+                "m4a"
+            ]
+        },
+        {
+            "host": "www.sharenice.net",
+            "rule": [
+                "huoshan.com",
+                "/item/video/"
+            ],
+            "filter": [
+                "影视"
+            ]
+        },
+        {
+            "host": "www.sharenice.net",
+            "rule": [
+                "sovv.qianpailive.com",
+                "vid="
+            ],
+            "filter": [
+                "影视"
+            ]
+        },
+        {
+            "host": "www.sharenice.net",
+            "rule": [
+                "douyin.com",
+                "/play/"
+            ]
+        },
+        {
+            "host": "m.ysxs8.vip",
+            "rule": [
+                "ysting.ysxs8.vip:81",
+                "xmcdn.com"
+            ],
+            "filter": [
+                "影视"
+            ]
+        },
+        {
+            "host": "hdmoli.com",
+            "rule": [
+                ".m3u8"
+            ]
+        },
+        {
+            "host": "https://api.live.bilibili.com",
+            "rule": [
+                "bilivideo.com",
+                "/index.m3u8"
+            ],
+            "filter": [
+                "data.bilibili.com/log/web",
+                "i0.hdslb.com/bfs/live/"
+            ]
+        },
+        {
+            "host": "www.fun4k.com",
+            "rule": [
+                "https://hd.ijycnd.com/play",
+                "index.m3u8"
+            ]
+        },
+        {
+            "host": "www.iesdouyin.com",
+            "rule": [
+                "playwm/?video_id="
+            ]
+        },
+        {
+            "host": "www.ysgc.vip",
+            "rule": [
+                "getm3u8?url=http"
+            ]
+        },
+        {
+            "host": "v.douyin.com",
+            "rule": [
+                "playwm/?video_id="
+            ]
+        },
+        {
+            "host": "*",
+            "rule": [
+                "douyin.com/aweme",
+                "video_id="
+            ]
+        },
+        {
+            "host": "*",
+            "rule": [
+                "huoshan.com",
+                "/item/video/"
+            ]
+        },
+        {
+            "host": "*",
+            "rule": [
+                "http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a)\\?.*"
+            ]
+        },
+        {
+            "host": "*",
+            "rule": [
+                "http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a)"
+            ]
+        },
+        {
+            "host": "www.agemys.cc",
+            "rule": [
+                "cdn-tos",
+                "obj/tos-cn"
+            ]
+        },
+        {
+            "host": "www.sharenice.net",
+            "rule": [
+                "http.*?/play.{0,3}\\?[^url]{2,8}=.*",
+                "qianpailive.com",
+                "vid="
+            ]
+        },
+        {
+            "host": "www.sharenice.net",
+            "rule": [
+                "qianpailive.com",
+                "vid="
+            ]
+        },
+        {
+            "name": "星星",
+            "hosts": [
+                "aws.ulivetv.net"
+            ],
+            "regex": [
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:8,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:9,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+            ]
+        },
+        {
+            "name": "海外看",
+            "hosts": [
+                "haiwaikan"
+            ],
+            "regex": [
+                "8.1748",
+                "10.0099",
+                "10.3333"
+            ]
+        },
+        {
+            "name": "暴风广告",
+            "hosts": [
+                "bfzy",
+                "s5.bfzycdn"
+            ],
+            "regex": [
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY"
+            ]
+        },
+        {
+            "name": "蜗牛直连去广",
+            "hosts": [
+                "vip.123pan.cn",
+                "rescdn.wuxivlog.cn"
+            ],
+            "regex": [
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:20.840000,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:10.120000,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+                "#EXTINF.*?\\s+.*?1o.*?\\.ts\\s+"
+            ]
+        },
+        {
+            "name": "量子广告",
+            "hosts": [
+                "vip.lz",
+                "hd.lz",
+                "v.cdnlz"
+            ],
+            "regex": [
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.433333,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+                "#EXTINF.*?\\s+.*?1o.*?\\.ts\\s+"
+            ]
+        },
+        {
+            "name": "非凡广告",
+            "hosts": [
+                "vip.ffzy",
+                "hd.ffzy"
+            ],
+            "regex": [
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:6.666667,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+                "#EXTINF.*?\\s+.*?1o.*?\\.ts\\s+"
+            ]
+        },
+        {
+            "name": "暴风广告",
+            "hosts": [
+                "bfzy"
+            ],
+            "regex": [
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:3,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+                "#EXTINF.*?\\s+.*?1o.*?\\.ts\\s+"
+            ]
+        },
+        {
+            "name": "索尼广告",
+            "hosts": [
+                "suonizy"
+            ],
+            "regex": [
+                "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:7.680000,[\\s\\S]*?#EXT-X-DISCONTINUITY",
+                "#EXTINF.*?\\s+.*?1o.*?\\.ts\\s+"
+            ]
+        },
+        {
+            "name": "采集站广告",
+            "hosts": [
+                "vip.ffzy",
+                "hd.ffzy",
+                "vip.lz",
+                "hd.lz",
+                ".cdnlz",
+                "suonizy",
+                "bfzy"
+            ],
+            "regex": [
+                "#EXTINF.*?\\s+.*?1o.*?\\.ts\\s+",
+                "#EXTINF.*?\\s+.*?11697777.*?\\.ts\\s+",
+                "#EXTINF.*?\\s+.*?p1ayer.*?\\.ts\\s+"
+            ]
+        },
+        {
+            "name": "磁力广告",
+            "hosts": [
+                "magnet"
+            ],
+            "regex": [
+                "更多",
+                "社區",
+                "xuu",
+                "最新",
+                "直播",
+                "更新",
+                "社区",
+                "有趣",
+                "新片首发",
+                "UUE29"
+            ]
+        },
+        {
+            "name": "CKP嗅探",
+            "type": 0,
+            "url": "https://www.ckplayer.vip/jiexi/?url="
+        },
+        {
+            "name": "JXP嗅探",
+            "type": 0,
+            "url": "https://jx.playerjy.com/?url="
+        },
+        {
+            "name": "JXY嗅探",
+            "type": 0,
+            "url": "https://jx.yparse.com/index.php?url="
+        },
+        {
+            "name": "8090G嗅探",
+            "type": 0,
+            "url": "https://www.8090g.cn/?url="
+        },
+        {
+            "name": "PouYun嗅探",
+            "type": 0,
+            "url": "https://www.pouyun.com/?url="
+        },
+        {
+            "name": "虾米嗅探",
+            "type": 0,
+            "url": "https://jx.xmflv.com/?url="
+        },
+        {
+            "name": "YeMu嗅探",
+            "type": 0,
+            "url": "https://www.yemu.xyz/?url="
+        },
+        {
+            "name": "JXTV嗅探",
+            "type": 0,
+            "url": "https://jx.m3u8.tv/jiexi/?url="
+        },
+        {
+            "name": "BDJX嗅探",
+            "type": 0,
+            "url": "https://bd.jx.cn/?url="
+        },
+        {
+            "name": "Play嗅探",
+            "type": 0,
+            "url": "https://www.playm3u8.cn/jiexi.php?url="
+        },
+        {
+            "name": "火山嗅探",
+            "hosts": [
+                "huoshan.com"
+            ],
+            "regex": [
+                "item_id="
+            ]
+        },
+        {
+            "name": "抖音嗅探",
+            "hosts": [
+                "douyin.com"
+            ],
+            "regex": [
+                "is_play_url="
+            ]
+        },
+        {
+            "name": "农民嗅探",
+            "hosts": [
+                "toutiaovod.com"
+            ],
+            "regex": [
+                "video/tos/cn"
+            ]
+        },
+        {
+            "name": "proxy",
+            "hosts": [
+                "raw.githubusercontent.com",
+                "googlevideo.com",
+                "cdn.v82u1l.com",
+                "cdn.iz8qkg.com",
+                "cdn.kin6c1.com",
+                "c.biggggg.com",
+                "c.olddddd.com",
+                "haiwaikan.com",
+                "www.histar.tv",
+                "youtube.com",
+                "uhibo.com",
+                ".*boku.*",
+                ".*nivod.*",
+                ".*ulivetv.*"
+            ]
+        },
+        {
+            "host": "zjmiao.com",
+            "rule": [
+                "play.videomiao.vip/API.php",
+                "time=",
+                "key=",
+                "path="
+            ]
+        }
+    ],
+    "parses": [
+        {
+            "name": "岁岁svip",
+            "type": 1,
+            "url": "http://8.129.30.117:8117/suisui.php?key=520&url="
+        },
+        {
+            "name": "虾米的解析",
+            "type": 0,
+            "url": "https://jx.xmflv.com/?url="
+        },
+        {
+            "name": "8090的解析",
+            "type": 0,
+            "url": "https://www.8090g.cn/?url="
+        },
+        {
+            "name": "YT的解析",
+            "type": 0,
+            "url": "https://jx.yangtu.top/?url="
+        },
+        {
+            "name": "CK的解析",
+            "type": 0,
+            "url": "https://www.ckplayer.vip/jiexi/?url="
+        },
+        {
+            "name": "解析聚合",
+            "type": 3,
+            "url": "Demo"
+        },
+        {
+            "name": "Web聚合",
+            "type": 3,
+            "url": "Web"
+        },
+        {
+            "name": "Json轮询",
+            "type": 2,
+            "url": "Sequence"
+        },
+        {
+            "name": "Json并发",
+            "type": 2,
+            "url": "Parallel"
+        },
+        {
+            "name": "️春盈绣探",
+            "type": 0,
+            "url": "https://www.pangujiexi.com/pangu/?url="
+        },
+        {
+            "name": "帅",
+            "type": 1,
+            "url": "http://pan.qiaoji8.com/tvbox/neibu.php?url="
+        },
+        {
+            "name": "Web聚合",
+            "type": 3,
+            "url": "Web"
+        },
+        {
+            "name": "聚合",
+            "type": 3,
+            "url": "Demo"
+        },
+        {
+            "name": "聚合1",
+            "type": 3,
+            "url": "Web"
+        },
+        {
+            "name": "聚合2",
+            "type": 0,
+            "url": "https://jx.xmflv.cc/?url=",
+            "ext": {
+                "flags": [
+                    "youku",
+                    "优酷",
+                    "优 酷",
+                    "优酷视频",
+                    "qq",
+                    "腾讯",
+                    "腾 讯",
+                    "腾讯视频",
+                    "iqiyi",
+                    "qiyi",
+                    "奇艺",
+                    "爱奇艺",
+                    "爱 奇 艺",
+                    "m1905",
+                    "xigua",
+                    "letv",
+                    "leshi",
+                    "乐视",
+                    "乐 视",
+                    "sohu",
+                    "搜狐",
+                    "搜 狐",
+                    "搜狐视频",
+                    "tudou",
+                    "pptv",
+                    "mgtv",
+                    "芒果",
+                    "imgo",
+                    "芒果TV",
+                    "芒 果 T V",
+                    "bilibili",
+                    "哔 哩",
+                    "哔 哩 哔 哩"
+                ]
+            }
+        }
+    ],
+    "ijk": [
+        {
+            "group": "软解码",
+            "options": [
+                {
+                    "category": 4,
+                    "name": "opensles",
+                    "value": "0"
+                },
+                {
+                    "category": 1,
+                    "name": "fflags",
+                    "value": "fastseek"
+                },
+                {
+                    "category": 4,
+                    "name": "framedrop",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "enable-accurate-seek",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "start-on-prepared",
+                    "value": "1"
+                },
+                {
+                    "category": 1,
+                    "name": "http-detect-range-support",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec-handle-resolution-change",
+                    "value": "0"
+                },
+                {
+                    "category": 2,
+                    "name": "skip_loop_filter",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "reconnect",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "overlay-format",
+                    "value": "842225234"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec-auto-rotate",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "soundtouch",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec-hevc",
+                    "value": "0"
+                },
+                {
+                    "category": 1,
+                    "name": "dns_cache_timeout",
+                    "value": "600000000"
                 }
-            }
-        } 
-        // 分流处理：如果是短剧好看的分类
-        else if (tid.startsWith("hk_")) {
-            const cateMap = { "hk_jingxuan": "jingxuanduanju", "hk_dushi": "dushi", "hk_chuanyue": "chuanyue" };
-            const cateId = cateMap[tid];
-            const url = `${HOST_HAOKAN}/vodshow/id/${cateId}/letter//page/${page}.html`;
-            const res = await axios.get(url, { headers: { "User-Agent": UA } });
-            const html = res.data;
-
-            const blockReg = /<a[^>]*href="\/voddetail\/([^.]+)\.html"[^>]*>([\s\(\S\)]*?)<\/a>/g;
-            let match;
-            while ((match = blockReg.exec(html)) !== null) {
-                const id = match[1];
-                const content = match[2];
-                const name = ctxString(content, 'title="', '"') || ctxString(content, 'alt="', '"');
-                const pic = ctxString(content, 'data-original="', '"') || ctxString(content, 'src="', '"');
-                
-                if(id) {
-                    list.push({
-                        vod_id: "hk_" + id,
-                        vod_name: "[好看] " + name,
-                        vod_pic: pic.startsWith('http') ? pic : HOST_HAOKAN + pic,
-                        vod_remarks: "高清短剧"
-                    });
+            ]
+        },
+        {
+            "group": "硬解码",
+            "options": [
+                {
+                    "category": 4,
+                    "name": "opensles",
+                    "value": "0"
+                },
+                {
+                    "category": 1,
+                    "name": "fflags",
+                    "value": "fastseek"
+                },
+                {
+                    "category": 4,
+                    "name": "framedrop",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "enable-accurate-seek",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "start-on-prepared",
+                    "value": "1"
+                },
+                {
+                    "category": 1,
+                    "name": "http-detect-range-support",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec-handle-resolution-change",
+                    "value": "1"
+                },
+                {
+                    "category": 2,
+                    "name": "skip_loop_filter",
+                    "value": "0"
+                },
+                {
+                    "category": 4,
+                    "name": "reconnect",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "overlay-format",
+                    "value": "842225234"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec-auto-rotate",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "soundtouch",
+                    "value": "1"
+                },
+                {
+                    "category": 4,
+                    "name": "mediacodec-hevc",
+                    "value": "1"
+                },
+                {
+                    "category": 1,
+                    "name": "dns_cache_timeout",
+                    "value": "600000000"
                 }
-            }
+            ]
         }
-
-        return JSON.stringify({ page: parseInt(page), pagecount: 99, limit: 20, total: 1980, list: list });
-    } catch (e) {
-        return JSON.stringify({ list: [] });
-    }
+    ],
+    "ads": [
+        "mimg.0c1q0l.cn",
+        "www.googletagmanager.com",
+        "www.google-analytics.com",
+        "mc.usihnbcq.cn",
+        "mg.g1mm3d.cn",
+        "mscs.svaeuzh.cn",
+        "cnzz.hhttm.top",
+        "tp.vinuxhome.com",
+        "iqiyi.hbuioo.com",
+        "vip.ffzyad.com",
+        "cnzz.mmstat.com",
+        "www.baihuillq.com",
+        "s23.cnzz.com",
+        "z3.cnzz.com",
+        "c.cnzz.com",
+        "stj.v1vo.top",
+        "z12.cnzz.com",
+        "img.mosflower.cn",
+        "tips.gamevvip.com",
+        "ehwe.yhdtns.com",
+        "xdn.cqqc3.com",
+        "www.jixunkyy.cn",
+        "sp.chemacid.cn",
+        "hm.baidu.com",
+        "s9.cnzz.com",
+        "z6.cnzz.com",
+        "um.cavuc.com",
+        "mav.mavuz.com",
+        "wofwk.aoidf3.com",
+        "z5.cnzz.com",
+        "so.toutiao.com",
+        "xc.hubeijieshikj.cn",
+        "tj.tianwenhu.com",
+        "xg.gars57.cn",
+        "k.jinxiuzhilv.com",
+        "cdn.bootcss.com",
+        "ppl.xunzhuo123.com",
+        "xomk.jiangjunmh.top",
+        "img.xunzhuo123.com",
+        "z1.cnzz.com",
+        "s13.cnzz.com",
+        "xg.huataisangao.cn",
+        "z7.cnzz.com",
+        "xg.huataisangao.cn",
+        "z2.cnzz.com",
+        "s96.cnzz.com",
+        "q11.cnzz.com",
+        "thy.dacedsfa.cn",
+        "xg.whsbpw.cn",
+        "s19.cnzz.com",
+        "z8.cnzz.com",
+        "s4.cnzz.com",
+        "f5w.as12df.top",
+        "ae01.alicdn.com",
+        "www.92424.cn",
+        "k.wudejia.com",
+        "vivovip.mmszxc.top",
+        "qiu.xixiqiu.com",
+        "cdnjs.hnfenxun.com",
+        "cms.qdwght.com"
+    ],
+    "logo": "https://d.kstore.dev/download/7996/logo/logo.gif",
+    "wallpaper": "https://深色壁纸.xxooo.cf/"
 }
-
-/**
- * 3. 详情页与选集提取
- */
-async function detail(id) {
-    try {
-        let playListArray = [];
-        let name = "短剧详情", pic = "", desc = "";
-        let originId = id.substring(3);
-
-        if (id.startsWith("dd_")) {
-            const url = `${HOST_DIDUAN}/video/${originId}.html`;
-            const res = await axios.get(url, { headers: { "User-Agent": UA } });
-            const html = res.data;
-            name = ctxString(html, '<h1>', '</h1>') || "低端短剧";
-            pic = ctxString(html, 'class="module-item-pic"><img src="', '"');
-            desc = ctxString(html, 'module-info-introduction-content">', '</div>');
-
-            const epReg = /<a[^>]*href="\/play\/([^\.]+)\.html"[^>]*><span>([^<]+)<\/span>/g;
-            let match;
-            while ((match = epReg.exec(html)) !== null) {
-                playListArray.push(`${match[2].trim()}$dd_${match[1]}`);
-            }
-        } else if (id.startsWith("hk_")) {
-            const url = `${HOST_HAOKAN}/voddetail/${originId}.html`;
-            const res = await axios.get(url, { headers: { "User-Agent": UA } });
-            const html = res.data;
-            name = ctxString(html, '<h1>', '</h1>') || "好看短剧";
-            pic = ctxString(html, 'class="vod-pic"><img src="', '"');
-            desc = ctxString(html, '简介：', '</li>');
-
-            const epReg = /<a[^>]*href="\/vodplay\/([^.]+)\.html"[^>]*>([^<]+)<\/a>/g;
-            let match;
-            while ((match = epReg.exec(html)) !== null) {
-                playListArray.push(`${match[2].trim()}$hk_${match[1]}`);
-            }
-        }
-
-        return JSON.stringify({
-            list: [{
-                vod_id: id,
-                vod_name: name,
-                vod_pic: pic,
-                vod_content: desc.replace(/<[^>]+>/g, '').trim() || "暂无简介",
-                vod_play_from: "多源短剧流",
-                vod_play_url: playListArray.join('#')
-            }]
-        });
-    } catch (e) {
-        return JSON.stringify({ list: [] });
-    }
-}
-
-/**
- * 4. 搜索功能 (同时搜两个站)
- */
-async function search(wd, quick) {
-    try {
-        const list = [];
-        // 简单实现单站搜索（以短剧好看为例，避免多异步请求在部分壳里超时）
-        const url = `${HOST_HAOKAN}/vodsearch/page/1/wd/${encodeURIComponent(wd)}.html`;
-        const res = await axios.get(url, { headers: { "User-Agent": UA } });
-        const html = res.data;
-
-        const searchReg = /<a[^>]*href="\/voddetail\/([^.]+)\.html"[^>]*>([\s\(\S\)]*?)<\/a>/g;
-        let match;
-        while ((match = searchReg.exec(html)) !== null) {
-            const id = match[1];
-            const content = match[2];
-            const name = ctxString(content, 'title="', '"');
-            const pic = ctxString(content, 'data-original="', '"');
-            list.push({
-                vod_id: "hk_" + id,
-                vod_name: "[搜索] " + name,
-                vod_pic: pic.startsWith('http') ? pic : HOST_HAOKAN + pic,
-                vod_remarks: "点击播放"
-            });
-        }
-        return JSON.stringify({ list: list });
-    } catch (e) {
-        return JSON.stringify({ list: [] });
-    }
-}
-
-/**
- * 5. 播放解析
- */
-async function play(flag, id, flags) {
-    try {
-        let videoUrl = "";
-        let originPlayId = id.substring(3);
-
-        if (id.startsWith("dd_")) {
-            const url = `${HOST_DIDUAN}/play/${originPlayId}.html`;
-            const res = await axios.get(url, { headers: { "User-Agent": UA } });
-            const urlMatch = res.data.match(/"url"\s*:\s*"([^"]+)"/);
-            if (urlMatch && urlMatch[1]) {
-                videoUrl = decodeURIComponent(urlMatch[1]).replace(/\\/g, '');
-                if(videoUrl.includes("url=")) videoUrl = videoUrl.split("url=")[1];
-            }
-        } else if (id.startsWith("hk_")) {
-            const url = `${HOST_HAOKAN}/vodplay/${originPlayId}.html`;
-            const res = await axios.get(url, { headers: { "User-Agent": UA } });
-            const urlMatch = res.data.match(/"url"\s*:\s*"([^"]+)"/);
-            if (urlMatch && urlMatch[1]) {
-                videoUrl = urlMatch[1].replace(/\\/g, '');
-            }
-        }
-
-        return JSON.stringify({ parse: 0, url: videoUrl, header: { "User-Agent": UA } });
-    } catch (e) {
-        return JSON.stringify({ parse: 0, url: "" });
-    }
-}
-
-module.exports = { home, category, detail, search, play };
